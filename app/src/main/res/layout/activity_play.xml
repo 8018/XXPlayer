@@ -5,13 +5,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".MainActivity">
+    tools:context=".PlayActivity">
 
-    <Button
-        android:id="@+id/btn_play"
-        android:text="Play"
+    <me.xfly.xxplayer.VideoSurfaceView
+        android:id="@+id/video_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="250dp" />
 
 
 </LinearLayout>

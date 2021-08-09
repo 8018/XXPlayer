@@ -1,4 +1,4 @@
-package me.xfly.boboplayer;
+package me.xfly.xxplayer;
 
 
 import android.annotation.TargetApi;

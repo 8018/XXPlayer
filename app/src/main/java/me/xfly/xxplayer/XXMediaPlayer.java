@@ -1,18 +1,15 @@
-package me.xfly.boboplayer;
+package me.xfly.xxplayer;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Rect;
-import android.graphics.SurfaceTexture;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.util.Log;
 import android.view.Surface;
-import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
 
 import java.io.FileDescriptor;

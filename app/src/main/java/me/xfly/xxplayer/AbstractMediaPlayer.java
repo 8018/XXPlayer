@@ -1,4 +1,4 @@
-package me.xfly.boboplayer;
+package me.xfly.xxplayer;
 
 public abstract class AbstractMediaPlayer implements IMediaPlayer{
     private OnPreparedListener mOnPreparedListener;

@@ -1,33 +1,35 @@
-package me.xfly.boboplayer;
+package me.xfly.xxplayer;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
-import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Environment;
-import android.widget.TextView;
+import android.view.View;
 
-import java.io.IOException;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
+public class MainActivity extends AppCompatActivity {
 
-import static android.content.pm.PackageManager.*;
-
-public class MainActivity extends AppCompatActivity implements HolderCallBack {
-
-
-    String path;
-    VideoSurfaceView mSurfaceView;
-    XXMediaPlayer mMediaPlayer;
-    boolean isStarted = false;
+    String path = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        verifyStoragePermissions(this);
+        findViewById(R.id.btn_play).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int permission = ActivityCompat.checkSelfPermission(MainActivity.this,
+                        "android.permission.WRITE_EXTERNAL_STORAGE");
+                if (permission != PERMISSION_GRANTED) {
+                    return;
+                }
+                PlayActivity.startActivity(path,MainActivity.this);
+            }
+        });
 
         path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Black-Widow.mkv";
 
@@ -40,43 +42,8 @@ public class MainActivity extends AppCompatActivity implements HolderCallBack {
         //path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/loki.mp4";
         //path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/yun.mp4";
 
-        mSurfaceView = findViewById(R.id.video_view);
-        mSurfaceView.setHolderCallBack(this);
+        verifyStoragePermissions(this);
 
-        TextView textView = findViewById(R.id.text);
-
-        mMediaPlayer = new XXMediaPlayer();
-        mMediaPlayer.setOnPreparedListener(mp -> {
-            isStarted = true;
-            mMediaPlayer.start();
-        });
-        try {
-            mMediaPlayer.setDataSource(path);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        // 透明度动画
-        ObjectAnimator.ofFloat(textView, "alpha", 1, 0, 1)
-                .setDuration(4000)
-                .start();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        mMediaPlayer.pause();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        mMediaPlayer.finalize();
     }
 
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
@@ -99,21 +66,4 @@ public class MainActivity extends AppCompatActivity implements HolderCallBack {
             e.printStackTrace();
         }
     }
-
-    @Override
-    public void onSurfaceCreated() {
-        mMediaPlayer.setSurface(mSurfaceView.getSurface());
-
-    }
-
-    @Override
-    public void onSurfaceDestroyed() {
-        mMediaPlayer.setSurface(null);
-    }
-}
-
-interface HolderCallBack {
-    void onSurfaceCreated();
-
-    void onSurfaceDestroyed();
 }
