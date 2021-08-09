@@ -6,7 +6,7 @@ android {
     ndkVersion "23.0.7421159"
 
     defaultConfig {
-        applicationId "me.xfly.boboplayer"
+        applicationId "me.xfly.xxplayer"
         minSdkVersion 21
         targetSdkVersion 30
         versionCode 1

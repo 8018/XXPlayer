@@ -35,14 +35,15 @@ extern "C" jint JNIEXPORT JNICALL JNI_OnLoad(JavaVM *jvm, void *reserved) {
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_xfly_boboplayer_XXMediaPlayer_native_1init(JNIEnv *env, jclass clazz,
-        jobject xxmedia_player_this) {
+Java_me_xfly_xxplayer_XXMediaPlayer_native_1init(JNIEnv *env, jclass clazz,
+                                                 jobject xxmedia_player_this) {
     xxMediaPlayer = new XXMediaPlayer(JVM::GetInstance()->jvm(),env,env->NewGlobalRef(xxmedia_player_this));
+
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_xfly_boboplayer_XXMediaPlayer_native_1finalize(JNIEnv *env, jobject thiz) {
+Java_me_xfly_xxplayer_XXMediaPlayer_native_1finalize(JNIEnv *env, jobject thiz) {
     if (xxMediaPlayer!= nullptr){
         xxMediaPlayer->onStop();
         delete xxMediaPlayer;
@@ -53,7 +54,7 @@ Java_me_xfly_boboplayer_XXMediaPlayer_native_1finalize(JNIEnv *env, jobject thiz
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_xfly_boboplayer_XXMediaPlayer__1start(JNIEnv *env, jobject thiz) {
+Java_me_xfly_xxplayer_XXMediaPlayer__1start(JNIEnv *env, jobject thiz) {
     if(!xxMediaPlayer){
         return;
     }
@@ -62,14 +63,14 @@ Java_me_xfly_boboplayer_XXMediaPlayer__1start(JNIEnv *env, jobject thiz) {
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_xfly_boboplayer_XXMediaPlayer__1setStreamSelected(JNIEnv *env, jobject thiz, jint stream,
+Java_me_xfly_xxplayer_XXMediaPlayer__1setStreamSelected(JNIEnv *env, jobject thiz, jint stream,
                                                           jboolean select) {
     // TODO: implement _setStreamSelected()
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_xfly_boboplayer_XXMediaPlayer__1pause(JNIEnv *env, jobject thiz) {
+Java_me_xfly_xxplayer_XXMediaPlayer__1pause(JNIEnv *env, jobject thiz) {
     if(!xxMediaPlayer){
         return;
     }
@@ -78,7 +79,7 @@ Java_me_xfly_boboplayer_XXMediaPlayer__1pause(JNIEnv *env, jobject thiz) {
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_xfly_boboplayer_XXMediaPlayer__1stop(JNIEnv *env, jobject thiz) {
+Java_me_xfly_xxplayer_XXMediaPlayer__1stop(JNIEnv *env, jobject thiz) {
     if(!xxMediaPlayer){
         return;
     }
@@ -87,7 +88,7 @@ Java_me_xfly_boboplayer_XXMediaPlayer__1stop(JNIEnv *env, jobject thiz) {
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_xfly_boboplayer_XXMediaPlayer__1prepareAsync(JNIEnv *env, jobject thiz) {
+Java_me_xfly_xxplayer_XXMediaPlayer__1prepareAsync(JNIEnv *env, jobject thiz) {
     if(!xxMediaPlayer){
         return;
     }
@@ -96,7 +97,7 @@ Java_me_xfly_boboplayer_XXMediaPlayer__1prepareAsync(JNIEnv *env, jobject thiz) 
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_xfly_boboplayer_XXMediaPlayer_setVideoSurface(JNIEnv *env, jobject thiz, jobject surface) {
+Java_me_xfly_xxplayer_XXMediaPlayer_setVideoSurface(JNIEnv *env, jobject thiz, jobject surface) {
     if(!xxMediaPlayer){
         return;
     }
@@ -110,7 +111,7 @@ Java_me_xfly_boboplayer_XXMediaPlayer_setVideoSurface(JNIEnv *env, jobject thiz,
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_xfly_boboplayer_XXMediaPlayer_setFrameAtTime(JNIEnv *env, jobject thiz,
+Java_me_xfly_xxplayer_XXMediaPlayer_setFrameAtTime(JNIEnv *env, jobject thiz,
                                                      jstring img_cache_path, jlong start_time,
                                                      jlong end_time, jint num,
                                                      jint img_definition) {
@@ -119,7 +120,7 @@ Java_me_xfly_boboplayer_XXMediaPlayer_setFrameAtTime(JNIEnv *env, jobject thiz,
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_xfly_boboplayer_XXMediaPlayer__1setDataSource(JNIEnv *env, jobject thiz,
+Java_me_xfly_xxplayer_XXMediaPlayer__1setDataSource(JNIEnv *env, jobject thiz,
                                                       jstring data_source) {
     if(xxMediaPlayer == NULL){
         return;
@@ -129,7 +130,7 @@ Java_me_xfly_boboplayer_XXMediaPlayer__1setDataSource(JNIEnv *env, jobject thiz,
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_xfly_boboplayer_XXMediaPlayer__1prepare(JNIEnv *env, jobject thiz) {
+Java_me_xfly_xxplayer_XXMediaPlayer__1prepare(JNIEnv *env, jobject thiz) {
     if(xxMediaPlayer == NULL){
         return;
     }
@@ -149,7 +150,7 @@ Java_me_xfly_boboplayer_XXMediaPlayer__1prepare(JNIEnv *env, jobject thiz) {
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_me_xfly_boboplayer_XXMediaPlayer__1resume(JNIEnv *env, jobject thiz) {
+Java_me_xfly_xxplayer_XXMediaPlayer__1resume(JNIEnv *env, jobject thiz) {
     if(xxMediaPlayer == NULL){
         return;
     }
