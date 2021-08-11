@@ -22,7 +22,6 @@ NativeWindowVideoRender::NativeWindowVideoRender() {
 }
 
 NativeWindowVideoRender::~NativeWindowVideoRender() {
-    release();
 }
 
 void NativeWindowVideoRender::resume() {}
@@ -40,8 +39,10 @@ void NativeWindowVideoRender::startRender() {
     double diff = 0;
 
     while (_xx_play->_play_status != XXP_PLAY_STATUS_STOP && _xx_play->_surface != nullptr) {
-        if (_xx_play->_play_status == XXP_PLAY_STATUS_PAUSE ||
-            _xx_play->_play_status == XXP_PLAY_STATUS_NO_SURFACE) {
+        if (_xx_play->_video_render_status == VIDEO_RENDER_STATUS_NO_SURFACE) {
+            break;
+        }
+        if (_xx_play->_play_status == XXP_PLAY_STATUS_PAUSE||_xx_play->_play_status == XXP_PLAY_STATUS_CREATED) {
             av_usleep(1000 * 100);
             continue;
         }
@@ -115,8 +116,6 @@ void NativeWindowVideoRender::startRender() {
         av_free(frame);
         frame = NULL;
     }
-    ANativeWindow_release(m_native_window);
-
 }
 
 int NativeWindowVideoRender::initRender() {
@@ -216,29 +215,29 @@ double NativeWindowVideoRender::getDelayTime(double diff) {
 }
 
 void NativeWindowVideoRender::release() {
+    LOGE("NativeWindowVideoRender", "release")
+
+    if (_xx_play->_video_render_status == VIDEO_RENDER_STATUS_RELEASED) {
+        return;
+    }
+    if(_video_render_thread != 0){
+         pthread_join(_video_render_thread, NULL);
+    }
+    _xx_play->_video_render_status = VIDEO_RENDER_STATUS_RELEASED;
+   // LOGE("NativeWindowVideoRender", "release2")
+
     if (out_buffer != nullptr) {
         free(out_buffer);
         out_buffer = nullptr;;
     }
 
-    if (src != nullptr) {
-        free(src);
-        src = nullptr;;
-    }
-
-    if (dst != nullptr) {
-        free(dst);
-        src = nullptr;;
-    }
-
     if (m_native_window != nullptr) {
-        free(m_native_window);
-        delete m_native_window;
-        m_native_window = nullptr;
+        //free(m_native_window);
+        ANativeWindow_release(m_native_window);
     }
     if (m_sws_ctx != nullptr) {
         sws_freeContext(m_sws_ctx);
-        m_native_window = nullptr;
+        m_sws_ctx = nullptr;
     }
 
     if (m_rgb_frame != nullptr) {
@@ -246,4 +245,5 @@ void NativeWindowVideoRender::release() {
         av_free(m_rgb_frame);
         m_rgb_frame = NULL;
     }
+
 }

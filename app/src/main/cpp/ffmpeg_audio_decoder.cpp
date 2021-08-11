@@ -2,6 +2,7 @@
 // Created by Neo on 2021/7/9.
 //
 
+#include <unistd.h>
 #include "ffmpeg_audio_decoder.h"
 #include "LogUtil.h"
 
@@ -20,7 +21,6 @@ FFMpegAudioDecoder::FFMpegAudioDecoder() {
 }
 
 FFMpegAudioDecoder::~FFMpegAudioDecoder() {
-    release();
 }
 
 void FFMpegAudioDecoder::start() {
@@ -28,10 +28,10 @@ void FFMpegAudioDecoder::start() {
 }
 
 void FFMpegAudioDecoder::decode() {
+
     while (_xx_play->_play_status != XXP_PLAY_STATUS_STOP) {
         int ret = -1;
-        if (_xx_play->_play_status == XXP_PLAY_STATUS_PAUSE ||
-            _xx_play->_play_status == XXP_PLAY_STATUS_NO_SURFACE) {
+        if (_xx_play->_play_status == XXP_PLAY_STATUS_PAUSE ) {
             av_usleep(1000 * 100);
             continue;
         }
@@ -105,6 +105,10 @@ void FFMpegAudioDecoder::stop() {}
 void FFMpegAudioDecoder::pause() {}
 
 void FFMpegAudioDecoder::release() {
+    if(_decode_thread != 0){
+        pthread_join(_decode_thread, NULL);
+    }
+
     if (_av_codec_context != nullptr){
         avcodec_free_context(&_av_codec_context);
         _av_codec_context = nullptr;

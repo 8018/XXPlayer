@@ -18,13 +18,10 @@ XXPlay::XXPlay(std::shared_ptr<JavaCall> javaCall) : _java_call(javaCall) {
 }
 
 XXPlay::~XXPlay() {
-    release();
-
-    if (_av_format_context) {
+    if(_av_format_context != nullptr){
         avformat_free_context(_av_format_context);
         _av_format_context = nullptr;
     }
-
     pthread_mutex_destroy(&audio_packet_mutex);
     pthread_mutex_destroy(&video_packet_mutex);
     pthread_mutex_destroy(&audio_frame_mutex);
@@ -236,9 +233,7 @@ void XXPlay::clearAudioFrame() {
     while (!audio_frame_queue.empty()) {
         AVFrame *frame = audio_frame_queue.front();
         audio_frame_queue.pop();
-        av_free(frame->data);
-        av_free(frame->buf);
-        av_free(frame->side_data);
+        av_frame_free(&frame);
         frame = NULL;
     }
     pthread_mutex_unlock(&audio_frame_mutex);
@@ -251,9 +246,7 @@ void XXPlay::clearVideoFrame() {
     while (!video_frame_queue.empty()) {
         AVFrame *frame = video_frame_queue.front();
         video_frame_queue.pop();
-        av_free(frame->data);
-        av_free(frame->buf);
-        av_free(frame->side_data);
+        av_frame_free(&frame);
         frame = NULL;
     }
     pthread_mutex_unlock(&video_frame_mutex);

@@ -9,6 +9,7 @@
 #include "opensl_audio_render.h"
 #include "native_window_video_render.h"
 #include "xx_msg.h"
+#include "LogUtil.h"
 
 XXMediaPlayer::XXMediaPlayer(JavaVM *javaVm, JNIEnv *main_env, jobject media_player_java_ref) {
     pthread_mutex_init(&_init_mutex, nullptr);
@@ -32,8 +33,11 @@ void XXMediaPlayer::setSurface(jobject surface) {
     }
 
     if (!surface) {
-        _xx_play->_play_status = XXP_PLAY_STATUS_NO_SURFACE;
+        _xx_play->_video_render_status = VIDEO_RENDER_STATUS_NO_SURFACE;
         _video_render->releaseRender();
+    } else {
+        _xx_play->_video_render_status = VIDEO_RENDER_STATUS_SURFACE_ATTACHED;
+        _video_render->start();
     }
     pthread_mutex_unlock(&_init_mutex);
 }
@@ -139,6 +143,7 @@ int XXMediaPlayer::prepare() {
 
     _video_render = std::shared_ptr<BaseRender>(new NativeWindowVideoRender());
     _video_render->_xx_play = _xx_play;
+    _xx_play->_video_render_status = VIDEO_RENDER_STATUS_CREATED;
     _video_render->_av_codec_context = _video_decoder->_av_codec_context;
 
     _media_extractor->start();
@@ -160,20 +165,13 @@ void XXMediaPlayer::onStart() {
 
         _audio_render->initRender();
         _audio_render->start();
-        _video_render->start();
+        //_video_render->start();
         return;
     }
 
-    if (_xx_play->_play_status == XXP_PLAY_STATUS_NO_SURFACE) {
+    if (_xx_play->_play_status == XXP_PLAY_STATUS_PAUSE) {
         _xx_play->_play_status = XXP_PLAY_STATUS_PLAY;
         _audio_render->resume();
-        _video_render->start();
-        return;
-    }
-
-    if (_xx_play->_play_status == SL_PLAYSTATE_PAUSED) {
-        _xx_play->_play_status = XXP_PLAY_STATUS_PLAY;
-        _audio_render->start();
         return;
     }
 }
@@ -187,9 +185,9 @@ void XXMediaPlayer::onPause() {
 
 void XXMediaPlayer::onStop() {
     _xx_play->_play_status = XXP_PLAY_STATUS_STOP;
-    _audio_render->stop();
-
-    release();
+    if (_audio_render != nullptr) {
+        _audio_render->stop();
+    }
 }
 
 void XXMediaPlayer::onResume() {
@@ -264,13 +262,15 @@ XXMediaPlayer::~XXMediaPlayer() {
 }
 
 int XXMediaPlayer::release() {
+
     if (_media_extractor != nullptr) {
         _media_extractor->release();
     }
     if (_audio_render != nullptr) {
         _audio_render->releaseRender();
     }
-    if (_video_render != nullptr) {
+    if (_video_render != nullptr &&
+        _xx_play->_video_render_status != VIDEO_RENDER_STATUS_RELEASED) {
         _video_render->releaseRender();
     }
     if (_audio_decoder != nullptr) {
@@ -280,6 +280,12 @@ int XXMediaPlayer::release() {
         _video_decoder->releaseDecoder();
     }
 
-    _xx_play->release();
-    isPrepared = false;
+    avformat_close_input(&_xx_play->_av_format_context);
+
+
+    if (_xx_play != nullptr) {
+        _xx_play->release();
+    }
+
+    return 0;
 }

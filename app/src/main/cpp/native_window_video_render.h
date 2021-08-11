@@ -47,8 +47,8 @@ public:
     SwsContext *m_sws_ctx = nullptr;
     AVFrame *m_rgb_frame = nullptr;
 
-    uint8_t *dst;
-    uint8_t *src;
+    uint8_t *dst = nullptr;
+    uint8_t *src = nullptr;
 };
 
 

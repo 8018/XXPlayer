@@ -23,7 +23,6 @@ OpenSLAudioRender::OpenSLAudioRender() {
 }
 
 OpenSLAudioRender::~OpenSLAudioRender() {
-    release();
 }
 
 int OpenSLAudioRender::initRender() {
@@ -175,8 +174,7 @@ void OpenSLAudioRender::startRender() {
 int OpenSLAudioRender::getPcmData() {
 
     int pcmDataSize;
-    if (_xx_play->_play_status == XXP_PLAY_STATUS_PAUSE ||
-        _xx_play->_play_status == XXP_PLAY_STATUS_NO_SURFACE) {
+    if (_xx_play->_play_status == XXP_PLAY_STATUS_PAUSE ) {
         return 0;
     }
 

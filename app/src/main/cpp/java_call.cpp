@@ -11,13 +11,13 @@ JavaCall::JavaCall(_JavaVM *javaVm, JNIEnv *main_env, jobject java_media_player)
                   java_media_player) {
 }
 
-JavaCall::~JavaCall() {}
+JavaCall::~JavaCall() {
+}
 
-void
-JavaCall::postEventFromNative(int thread_type, int what, int arg1, int arg2, jobject jobject1) {
+void JavaCall::postEventFromNative(int thread_type, int what, int arg1, int arg2, jobject jobject1) {
 
     if (thread_type == 1) {
-        jclass clazz = _main_env->GetObjectClass(_java_media_player);
+        jclass clazz = _main_env->FindClass(class_name);
 
         _post_event_method_id
                 = _main_env->GetStaticMethodID(clazz, method_name, method_sign);
@@ -34,12 +34,12 @@ JavaCall::postEventFromNative(int thread_type, int what, int arg1, int arg2, job
             return;
         }
 
-        _clz_java_media_player = env->GetObjectClass(_java_media_player);
+        jclass clazz = env->FindClass(class_name);
 
         _post_event_method_id
-                = env->GetStaticMethodID(_clz_java_media_player, method_name, method_sign);
+                = env->GetStaticMethodID(clazz, method_name, method_sign);
 
-        env->CallStaticVoidMethod(_clz_java_media_player, _post_event_method_id, _java_media_player,
+        env->CallStaticVoidMethod(clazz, _post_event_method_id, _java_media_player,
                                   1,
                                   1, 1, nullptr);
         _java_vm->DetachCurrentThread();

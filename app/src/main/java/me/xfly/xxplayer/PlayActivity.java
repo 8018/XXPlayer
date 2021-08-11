@@ -1,19 +1,24 @@
 package me.xfly.xxplayer;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.PowerManager;
+import android.util.Log;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.widget.TextView;
 
 import java.io.IOException;
 
-public class PlayActivity extends AppCompatActivity implements HolderCallBack {
+public class PlayActivity extends AppCompatActivity implements SurfaceHolder.Callback {
 
 
     String path;
-    VideoSurfaceView mSurfaceView;
+    SurfaceView mSurfaceView;
     XXMediaPlayer mMediaPlayer;
     boolean isStarted = false;
 
@@ -25,9 +30,7 @@ public class PlayActivity extends AppCompatActivity implements HolderCallBack {
         path = getIntent().getStringExtra("path");
 
         mSurfaceView = findViewById(R.id.video_view);
-        mSurfaceView.setHolderCallBack(this);
-
-        TextView textView = findViewById(R.id.text);
+        mSurfaceView.getHolder().addCallback(this);
 
         mMediaPlayer = new XXMediaPlayer();
         mMediaPlayer.setOnPreparedListener(mp -> {
@@ -39,6 +42,8 @@ public class PlayActivity extends AppCompatActivity implements HolderCallBack {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        mMediaPlayer.setWakeMode(this, PowerManager.SCREEN_BRIGHT_WAKE_LOCK);
 
     }
 
@@ -54,20 +59,9 @@ public class PlayActivity extends AppCompatActivity implements HolderCallBack {
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onDestroy() {
+        super.onDestroy();
         mMediaPlayer.finalize();
-    }
-
-    @Override
-    public void onSurfaceCreated() {
-        mMediaPlayer.setSurface(mSurfaceView.getSurface());
-
-    }
-
-    @Override
-    public void onSurfaceDestroyed() {
-        mMediaPlayer.setSurface(null);
     }
 
     public static void startActivity(String path,Activity activity){
@@ -75,10 +69,20 @@ public class PlayActivity extends AppCompatActivity implements HolderCallBack {
         intent.putExtra("path",path);
         activity.startActivity(intent);
     }
+
+    @Override
+    public void surfaceCreated(@NonNull SurfaceHolder holder) {
+        mMediaPlayer.setSurface(holder.getSurface());
+    }
+
+    @Override
+    public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width, int height) {
+
+    }
+
+    @Override
+    public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
+        mMediaPlayer.setSurface(null);
+    }
 }
 
-interface HolderCallBack {
-    void onSurfaceCreated();
-
-    void onSurfaceDestroyed();
-}

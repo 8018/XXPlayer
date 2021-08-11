@@ -7,12 +7,15 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
+import android.widget.TextView;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 public class MainActivity extends AppCompatActivity {
 
     String path = "";
+
+    TextView textView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +34,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        textView = findViewById(R.id.text);
+
         path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Black-Widow.mkv";
 
         path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/miandsu.mp4";
@@ -40,8 +45,8 @@ public class MainActivity extends AppCompatActivity {
         path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/ipx-612-c/ipx-612-c.mp4";
         path = "http://tx2play1.douyucdn.cn/live/920891rMypGSnYvc.xs";
         //path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/loki.mp4";
-        //path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/yun.mp4";
-
+        path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/yun.mp4";
+        textView.setText(path);
         verifyStoragePermissions(this);
 
     }

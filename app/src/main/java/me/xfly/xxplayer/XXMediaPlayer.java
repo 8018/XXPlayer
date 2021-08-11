@@ -114,7 +114,7 @@ public class XXMediaPlayer extends AbstractMediaPlayer {
     }
 
     public XXMediaPlayer() {
-        native_init(this);
+        native_init(new WeakReference<XXMediaPlayer>(this));
         mEventHandler = new EventHandler(this, Looper.getMainLooper());
     }
 
@@ -252,6 +252,7 @@ public class XXMediaPlayer extends AbstractMediaPlayer {
     }
 
     public void finalize(){
+        stayAwake(false);
         native_finalize();
     }
 
@@ -369,7 +370,11 @@ public class XXMediaPlayer extends AbstractMediaPlayer {
         if (weakThiz == null)
             return;
 
-        XXMediaPlayer mp = (XXMediaPlayer) weakThiz;
+        XXMediaPlayer mp = (XXMediaPlayer) ((WeakReference) weakThiz).get();
+        if (mp == null) {
+            return;
+        }
+
         if (mp.mEventHandler != null) {
             Message m = mp.mEventHandler.obtainMessage(what, arg1, arg2, obj);
             mp.mEventHandler.sendMessage(m);

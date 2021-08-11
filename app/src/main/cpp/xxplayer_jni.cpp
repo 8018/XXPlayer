@@ -9,10 +9,11 @@
 #include "xx_media_player.h"
 #include "xx_msg.h"
 
-XXMediaPlayer *xxMediaPlayer = NULL;
+XXMediaPlayer *xxMediaPlayer = nullptr;
+jobject java_media_player = nullptr;
 
 char* jstringToChar(JNIEnv* env, jstring jstr) {
-    char* rtn = NULL;
+    char* rtn = nullptr;
     jclass clsstring = env->FindClass("java/lang/String");
     jstring strencode = env->NewStringUTF("GB2312");
     jmethodID mid = env->GetMethodID(clsstring, "getBytes", "(Ljava/lang/String;)[B");
@@ -36,9 +37,9 @@ extern "C" jint JNIEXPORT JNICALL JNI_OnLoad(JavaVM *jvm, void *reserved) {
 extern "C"
 JNIEXPORT void JNICALL
 Java_me_xfly_xxplayer_XXMediaPlayer_native_1init(JNIEnv *env, jclass clazz,
-                                                 jobject xxmedia_player_this) {
-    xxMediaPlayer = new XXMediaPlayer(JVM::GetInstance()->jvm(),env,env->NewGlobalRef(xxmedia_player_this));
-
+        jobject xxmedia_player_this) {
+    java_media_player = env->NewGlobalRef(xxmedia_player_this);
+    xxMediaPlayer = new XXMediaPlayer(JVM::GetInstance()->jvm(),env,java_media_player);
 }
 
 extern "C"
@@ -46,8 +47,10 @@ JNIEXPORT void JNICALL
 Java_me_xfly_xxplayer_XXMediaPlayer_native_1finalize(JNIEnv *env, jobject thiz) {
     if (xxMediaPlayer!= nullptr){
         xxMediaPlayer->onStop();
+        xxMediaPlayer->release();
         delete xxMediaPlayer;
         xxMediaPlayer = nullptr;
+        env->DeleteGlobalRef(java_media_player);
     }
 }
 

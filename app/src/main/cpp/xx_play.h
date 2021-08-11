@@ -10,13 +10,18 @@
 #include "xx_media_channel.h"
 #include "java_call.h"
 
-#define XXP_PLAY_STATUS_UN_CREATED            -4
-#define XXP_PLAY_STATUS_CREATED               -3
-#define XXP_PLAY_STATUS_NO_SURFACE            -2
+#define XXP_PLAY_STATUS_UN_CREATED            -3
+#define XXP_PLAY_STATUS_CREATED               -2
 #define XXP_PLAY_STATUS_STOP                  -1
 #define XXP_PLAY_STATUS_PAUSE                 0
 #define XXP_PLAY_STATUS_PLAY                  1
 #define XXP_PLAY_STATUS_SEEK                  2
+
+#define VIDEO_RENDER_STATUS_NO_SURFACE                0
+#define VIDEO_RENDER_STATUS_SURFACE_ATTACHED          1
+#define VIDEO_RENDER_STATUS_CREATED                   2
+#define VIDEO_RENDER_STATUS_RELEASED                  3
+
 
 extern "C"
 {
@@ -105,6 +110,7 @@ public:
     pthread_cond_t video_frame_cond;
 
     int _play_status = XXP_PLAY_STATUS_UN_CREATED;
+    int _video_render_status = VIDEO_RENDER_STATUS_NO_SURFACE;
     int _audio_stream_index = 0;
     int _video_stream_index = 0;
     double clock = -1;

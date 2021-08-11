@@ -10,7 +10,7 @@
 class JavaCall {
 private :
     jobject _java_media_player;
-    jclass _clz_java_media_player;
+    const char *class_name = "me/xfly/xxplayer/XXMediaPlayer";
     const char *method_name = "postEventFromNative";
     const char *method_sign = "(Ljava/lang/Object;IIILjava/lang/Object;)V";
     jmethodID _post_event_method_id;

@@ -4,8 +4,10 @@
 
 #include "xx_media_extractor.h"
 #include <stdint.h>
+#include <unistd.h>
 #include "jvm_android.h"
 #include "LogUtil.h"
+#include<pthread.h>
 
 extern "C" {
 #include <libavutil/time.h>
@@ -32,7 +34,6 @@ void XXMediaExtractor::start() {
 void XXMediaExtractor::startExtractor() {
     pthread_mutex_lock(&_prepare_mutex);
 
-
     AVBSFContext *bsf_ctx;
     AVBitStreamFilter *filter = nullptr;
 
@@ -46,11 +47,8 @@ void XXMediaExtractor::startExtractor() {
         return;
     }
 
-
     while (_xx_play->_play_status != XXP_PLAY_STATUS_STOP) {
-
-        if (_xx_play->_play_status == XXP_PLAY_STATUS_PAUSE ||
-            _xx_play->_play_status == XXP_PLAY_STATUS_NO_SURFACE) {
+        if (_xx_play->_play_status == XXP_PLAY_STATUS_PAUSE) {
             av_usleep(1000 * 100);
             continue;
         }
@@ -60,7 +58,9 @@ void XXMediaExtractor::startExtractor() {
             av_usleep(1000 * 100);
             continue;
         }
-
+        if (_xx_play->_play_status == XXP_PLAY_STATUS_STOP) {
+            break;
+        }
         AVPacket *packet = av_packet_alloc();
         ret = av_read_frame(_xx_play->_av_format_context, packet);
 
@@ -108,6 +108,8 @@ void XXMediaExtractor::startExtractor() {
 }
 
 void XXMediaExtractor::release() {
-    pthread_mutex_destroy(&_prepare_mutex);
+    if(_extractor_thread != 0){
+        pthread_join(_extractor_thread, NULL);
+    }    pthread_mutex_destroy(&_prepare_mutex);
     pthread_mutex_destroy(&_seek_mutex);
 }
