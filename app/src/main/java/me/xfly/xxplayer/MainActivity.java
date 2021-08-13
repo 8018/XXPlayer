@@ -36,16 +36,16 @@ public class MainActivity extends AppCompatActivity {
 
         textView = findViewById(R.id.text);
 
-        path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Black-Widow.mkv";
-
-        path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/miandsu.mp4";
-        path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/mi.mp4";
-
+        // 可以播放本地视频、网络视频和直播流
+        //eg 1 本地视频
         //path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/yun.mp4";
-        path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/ipx-612-c/ipx-612-c.mp4";
-        path = "http://tx2play1.douyucdn.cn/live/920891rMypGSnYvc.xs";
-        //path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/loki.mp4";
-        path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/yun.mp4";
+        //eg 2 网络视频
+        // path = "http://vfx.mtime.cn/Video/2019/03/12/mp4/190312143927981075.mp4";
+        //eg 3 直播流
+        // path = "http://tx2play1.douyucdn.cn/live/5488708rXnqvnCb5.xs";
+
+        path = "http://vfx.mtime.cn/Video/2019/03/12/mp4/190312143927981075.mp4";
+
         textView.setText(path);
         verifyStoragePermissions(this);
 
