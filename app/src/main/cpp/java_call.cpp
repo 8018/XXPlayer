@@ -96,13 +96,10 @@ void JavaCall::onReleaseMediaCodec(int type) {
 
     } else {
         JNIEnv *env;
-
         int status = _java_vm->AttachCurrentThread(&env, 0);
-
         if (status < 0) {
             return;
         }
-
         env->CallVoidMethod(_xx_media_codec, release_codec_method_id);
         _java_vm->DetachCurrentThread();
     }

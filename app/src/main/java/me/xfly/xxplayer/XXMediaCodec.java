@@ -39,7 +39,7 @@ public class XXMediaCodec {
         time = time2;
         MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
 
-        if (bytes != null && mediaCodec != null && info != null && surface != null) {
+        if (bytes != null && mediaCodec != null && info != null) {
             try {
                 int inputBufferIndex = mediaCodec.dequeueInputBuffer(10);
 

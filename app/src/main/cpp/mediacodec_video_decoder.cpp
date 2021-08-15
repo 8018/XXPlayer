@@ -41,9 +41,6 @@ void MediaCodecVideoDecoder::decode() {
     double frame_pts = 0;
     double diff = 0;
     while (_xx_play->_play_status != XXP_PLAY_STATUS_STOP) {
-        if (_xx_play->_video_render_status == VIDEO_RENDER_STATUS_NO_SURFACE) {
-            break;
-        }
         if (_xx_play->_play_status == XXP_PLAY_STATUS_PAUSE ||
             _xx_play->_play_status == XXP_PLAY_STATUS_CREATED) {
             av_usleep(1000 * 100);
@@ -83,8 +80,6 @@ void MediaCodecVideoDecoder::decode() {
         }
 
         _xx_play->delay_time = getDelayTime(diff);
-        //LOGE("MediaCodecVideoDecoder", "delay time = %d",_xx_play->delay_time)
-        //LOGE("MediaCodecVideoDecoder", "video packet size = %d",_xx_play->getVideoPacketSize())
 
         _xx_play->getJavaCall()->onDecode(0, packet->size, packet->data, 0);
         av_usleep(_xx_play->delay_time * 1000);
@@ -96,13 +91,17 @@ void MediaCodecVideoDecoder::decode() {
 
 }
 
-void MediaCodecVideoDecoder::releaseDecoder() {}
+void MediaCodecVideoDecoder::releaseDecoder() {
+    release();
+}
 
 void MediaCodecVideoDecoder::pause() {}
 
 void MediaCodecVideoDecoder::stop() {}
 
-void MediaCodecVideoDecoder::release() {}
+void MediaCodecVideoDecoder::release() {
+    _xx_play->getJavaCall()->onReleaseMediaCodec(1);
+}
 
 double MediaCodecVideoDecoder::getDelayTime(double diff) {
 

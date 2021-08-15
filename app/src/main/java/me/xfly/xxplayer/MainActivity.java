@@ -23,16 +23,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        findViewById(R.id.btn_play).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int permission = ActivityCompat.checkSelfPermission(MainActivity.this,
-                        "android.permission.WRITE_EXTERNAL_STORAGE");
-                if (permission != PERMISSION_GRANTED) {
-                    return;
-                }
-                PlayActivity.startActivity(path,MainActivity.this);
+        findViewById(R.id.btn_play).setOnClickListener(v -> {
+            int permission = ActivityCompat.checkSelfPermission(MainActivity.this,
+                    "android.permission.WRITE_EXTERNAL_STORAGE");
+            if (permission != PERMISSION_GRANTED) {
+                return;
             }
+            PlayActivity.startActivity(path,MainActivity.this);
         });
 
         textView = findViewById(R.id.text);
@@ -45,11 +42,11 @@ public class MainActivity extends AppCompatActivity {
         //eg 3 直播流
         // path = "http://tx2play1.douyucdn.cn/live/718642rFRdEofIfw.xs";
 
-        path = "http://tx2play1.douyucdn.cn/live/3374504rKpYm6xJt.xs";
+        path = "http://tx2play1.douyucdn.cn/live/520raCr0JxC4wzlf.xs";
 
         textView.setText(path);
         verifyStoragePermissions(this);
-        PlayActivity.startActivity(path,MainActivity.this);
+        //PlayActivity.startActivity(path,MainActivity.this);
 
     }
 

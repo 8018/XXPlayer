@@ -46,7 +46,9 @@ void XXMediaPlayer::setSurface(jobject surface) {
         _xx_play->_video_render_status = VIDEO_RENDER_STATUS_SURFACE_ATTACHED;
         if(_xx_play->media_codec){
             _video_decoder->initDecoder();
-            _video_decoder->start();
+            if(_xx_play->_play_status != XXP_PLAY_STATUS_PAUSE){
+                _video_decoder->start();
+            }
         }else{
             _video_render->start();
         }
