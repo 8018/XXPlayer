@@ -72,14 +72,14 @@ void NativeWindowVideoRender::startRender() {
         if (_xx_play->clock != -1) {
             diff = _xx_play->clock - _xx_play->video_clock;
         }
-        _xx_play->delay_time = getDelayTime(diff);
+
         if (diff >= 0.5) {
             av_frame_free(&frame);
             av_free(frame);
             frame = NULL;
             continue;
         }
-
+        _xx_play->delay_time = getDelayTime(diff);
         av_usleep(_xx_play->delay_time * 1000);
 
         ANativeWindow_setBuffersGeometry(m_native_window, _av_codec_context->width,

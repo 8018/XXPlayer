@@ -30,6 +30,7 @@ add_library( # Sets the name of the library.
         xx_media_channel.cpp
         native_window_video_render.cpp
         java_call.cpp
+        mediacodec_video_decoder.cpp
         )
 
 

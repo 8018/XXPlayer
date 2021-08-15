@@ -41,6 +41,7 @@ public class XXMediaPlayer extends AbstractMediaPlayer {
     private PowerManager.WakeLock mWakeLock = null;
     private boolean mScreenOnWhilePlaying;
     private boolean mStayAwake;
+    private XXMediaCodec mXXMediaCodec;
 
     private int mVideoWidth;
     private int mVideoHeight;
@@ -48,7 +49,6 @@ public class XXMediaPlayer extends AbstractMediaPlayer {
     private int mVideoSarDen;
 
     private String mDataSource;
-    private Surface mSurface;
 
     // Used to load the 'native-lib' library on application startup.
     static {
@@ -56,7 +56,8 @@ public class XXMediaPlayer extends AbstractMediaPlayer {
     }
 
     public XXMediaPlayer() {
-        native_init(new WeakReference<XXMediaPlayer>(this));
+        mXXMediaCodec = new XXMediaCodec();
+        native_init(new WeakReference<XXMediaPlayer>(this),mXXMediaCodec);
         mEventHandler = new EventHandler(this, Looper.getMainLooper());
     }
 
@@ -189,7 +190,7 @@ public class XXMediaPlayer extends AbstractMediaPlayer {
 
     @Override
     public void setSurface(Surface surface) {
-        mSurface = surface;
+        mXXMediaCodec.setSurface(surface);
         setVideoSurface(surface);
     }
 
@@ -198,7 +199,7 @@ public class XXMediaPlayer extends AbstractMediaPlayer {
         native_finalize();
     }
 
-    public static native void native_init(Object XXMediaPlayer_this);
+    public static native void native_init(Object XXMediaPlayer_this,Object XXMediaCodec);
 
     private native void native_finalize();
 

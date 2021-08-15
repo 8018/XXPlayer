@@ -37,9 +37,9 @@ extern "C" jint JNIEXPORT JNICALL JNI_OnLoad(JavaVM *jvm, void *reserved) {
 extern "C"
 JNIEXPORT void JNICALL
 Java_me_xfly_xxplayer_XXMediaPlayer_native_1init(JNIEnv *env, jclass clazz,
-        jobject xxmedia_player_this) {
+        jobject xxmedia_player_this,jobject xx_media_codec) {
     java_media_player = env->NewGlobalRef(xxmedia_player_this);
-    xxMediaPlayer = new XXMediaPlayer(JVM::GetInstance()->jvm(),env,java_media_player);
+    xxMediaPlayer = new XXMediaPlayer(JVM::GetInstance()->jvm(),env,java_media_player,env->NewGlobalRef(xx_media_codec));
 }
 
 extern "C"

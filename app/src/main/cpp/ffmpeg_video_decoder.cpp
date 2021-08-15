@@ -74,7 +74,6 @@ void FFMpegVideoDecoder::decode() {
         if (result < 0) {
             if (ret == -11) {
                 avcodec_send_packet(_av_codec_context, packet);
-
             }
             av_packet_free(&packet);
             av_free(packet);

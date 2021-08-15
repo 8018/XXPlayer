@@ -36,15 +36,17 @@ void XXMediaExtractor::startExtractor() {
 
     AVBSFContext *bsf_ctx;
     AVBitStreamFilter *filter = nullptr;
-
     if (_xx_play->_mime_type != -1) {
+        //1 找到对应的解码过滤器
         filter = const_cast<AVBitStreamFilter *>(av_bsf_get_by_name(
                 "h264_mp4toannexb"));
-    }
-    int ret = av_bsf_alloc(filter, &bsf_ctx);
-
-    if (ret < 0) {
-        return;
+        //2 根据过滤器开辟上下文
+        av_bsf_alloc(filter, &bsf_ctx);
+        //3 添加解码器属性
+        avcodec_parameters_copy(bsf_ctx->par_in, _xx_play->parameters);
+        //4 初始化过滤器上下文
+        av_bsf_init(bsf_ctx);
+        bsf_ctx->time_base_in = _xx_play->video_codec_context->time_base;
     }
 
     while (_xx_play->_play_status != XXP_PLAY_STATUS_STOP) {
@@ -54,7 +56,7 @@ void XXMediaExtractor::startExtractor() {
         }
 
         if (_xx_play != nullptr &&
-            (_xx_play->getVideoPacketSize() + _xx_play->getAudioPacketSize() > 5* 1024) ) {
+            (_xx_play->getVideoPacketSize() + _xx_play->getAudioPacketSize() > 5 * 1024)) {
             av_usleep(1000 * 100);
             continue;
         }
@@ -62,7 +64,7 @@ void XXMediaExtractor::startExtractor() {
             break;
         }
         AVPacket *packet = av_packet_alloc();
-        ret = av_read_frame(_xx_play->_av_format_context, packet);
+        int ret = av_read_frame(_xx_play->_av_format_context, packet);
 
         if (ret == AVERROR_EOF) {
             av_packet_free(&packet);
@@ -82,10 +84,18 @@ void XXMediaExtractor::startExtractor() {
                     int ret = 0;
                     ret = av_bsf_send_packet(bsf_ctx, packet);
                     if (ret < 0) {
+                        av_packet_free(&packet);
+                        av_free(packet);
+                        packet = nullptr;
                         continue;
                     }
                     ret = av_bsf_receive_packet(bsf_ctx, packet);
-                    if (ret < 0) { continue; }
+                    if (ret < 0) {
+                        av_packet_free(&packet);
+                        av_free(packet);
+                        packet = nullptr;
+                        continue;
+                    }
                 }
                 _xx_play->putVideoPacket(packet);
 
@@ -101,6 +111,7 @@ void XXMediaExtractor::startExtractor() {
             continue;
         }
     }
+
     if (filter != nullptr) {
         av_bsf_free(&bsf_ctx);
     }
@@ -108,8 +119,9 @@ void XXMediaExtractor::startExtractor() {
 }
 
 void XXMediaExtractor::release() {
-    if(_extractor_thread != 0){
+    if (_extractor_thread != 0) {
         pthread_join(_extractor_thread, NULL);
-    }    pthread_mutex_destroy(&_prepare_mutex);
+    }
+    pthread_mutex_destroy(&_prepare_mutex);
     pthread_mutex_destroy(&_seek_mutex);
 }

@@ -88,7 +88,8 @@ public:
 
     AVFormatContext *_av_format_context;
     jobject _surface;
-    int _mime_type = 1;
+    int _mime_type = -1;
+    bool media_codec = false;
     bool is_avi = false;
     std::deque<XXMediaChannel *> _audio_channels;
     std::deque<XXMediaChannel *> _video_channels;
@@ -109,6 +110,9 @@ public:
     pthread_mutex_t video_frame_mutex;
     pthread_cond_t video_frame_cond;
 
+    AVCodecContext *audio_codec_context = nullptr;
+    AVCodecContext *video_codec_context = nullptr;
+
     int _play_status = XXP_PLAY_STATUS_UN_CREATED;
     int _video_render_status = VIDEO_RENDER_STATUS_NO_SURFACE;
     int _audio_stream_index = 0;
@@ -122,6 +126,7 @@ public:
     bool audio_frame_end = false;
     bool video_frame_end = false;
     bool extractor_end = false;
+    AVCodecParameters *parameters;
 };
 
 

@@ -5,9 +5,32 @@
 #ifndef XXPLAYER_MEDIACODEC_VIDEO_DECODER_H
 #define XXPLAYER_MEDIACODEC_VIDEO_DECODER_H
 
+#include <jni.h>
+#include "base_decoder.h"
 
-class mediacodec_video_decoder {
+class MediaCodecVideoDecoder : public BaseDecoder {
+private:
 
+public :
+    MediaCodecVideoDecoder();
+
+    ~MediaCodecVideoDecoder();
+
+    void initDecoder() override;
+
+    void releaseDecoder() override;
+
+    void start() override;
+
+    void stop() override;
+
+    void pause() override;
+
+    void decode() override;
+
+    void release();
+
+    double getDelayTime(double diff);
 };
 
 

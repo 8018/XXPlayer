@@ -4,6 +4,7 @@
 
 #include <filesystem>
 #include "xx_media_player.h"
+#include "mediacodec_video_decoder.h"
 #include "ffmpeg_audio_decoder.h"
 #include "ffmpeg_video_decoder.h"
 #include "opensl_audio_render.h"
@@ -11,10 +12,12 @@
 #include "xx_msg.h"
 #include "LogUtil.h"
 
-XXMediaPlayer::XXMediaPlayer(JavaVM *javaVm, JNIEnv *main_env, jobject media_player_java_ref) {
+XXMediaPlayer::XXMediaPlayer(JavaVM *javaVm, JNIEnv *main_env, jobject media_player_java_ref,
+                             jobject xx_media_codec) {
     pthread_mutex_init(&_init_mutex, nullptr);
 
-    _javaCall = std::shared_ptr<JavaCall>(new JavaCall(javaVm, main_env, media_player_java_ref));
+    _javaCall = std::shared_ptr<JavaCall>(
+            new JavaCall(javaVm, main_env, media_player_java_ref, xx_media_codec));
     _xx_play = std::shared_ptr<XXPlay>(new XXPlay(_javaCall));
     _xx_play->_play_status = XXP_PLAY_STATUS_CREATED;
 }
@@ -34,10 +37,19 @@ void XXMediaPlayer::setSurface(jobject surface) {
 
     if (!surface) {
         _xx_play->_video_render_status = VIDEO_RENDER_STATUS_NO_SURFACE;
-        _video_render->releaseRender();
+        if(_xx_play->media_codec){
+            _video_decoder->releaseDecoder();
+        }else{
+            _video_render->releaseRender();
+        }
     } else {
         _xx_play->_video_render_status = VIDEO_RENDER_STATUS_SURFACE_ATTACHED;
-        _video_render->start();
+        if(_xx_play->media_codec){
+            _video_decoder->initDecoder();
+            _video_decoder->start();
+        }else{
+            _video_render->start();
+        }
     }
     pthread_mutex_unlock(&_init_mutex);
 }
@@ -89,14 +101,12 @@ int XXMediaPlayer::prepare() {
     }
 
     if (_xx_play->_audio_channels.size() > 0) {
-        _audio_decoder = std::shared_ptr<BaseDecoder>(new FFMpegAudioDecoder());
-        _audio_decoder->_xx_play = _xx_play;
         setAudioChannel(0);
         if (_xx_play->_audio_stream_index >= 0 &&
             _xx_play->_audio_stream_index < pFormatCtx->nb_streams) {
             if (getAvCodecContext(
                     pFormatCtx->streams[_xx_play->_audio_stream_index]->codecpar,
-                    _audio_decoder.get()) !=
+                    0) !=
                 0) {
                 pthread_mutex_unlock(&_init_mutex);
                 return -1;
@@ -105,14 +115,13 @@ int XXMediaPlayer::prepare() {
     }
 
     if (_xx_play->_video_channels.size() > 0) {
-        _video_decoder = std::shared_ptr<BaseDecoder>(new FFMpegVideoDecoder());
-        _video_decoder->_xx_play = _xx_play;
+
         setVideoChannel(0);
         if (_xx_play->_video_stream_index >= 0 &&
             _xx_play->_video_stream_index < pFormatCtx->nb_streams) {
             if (getAvCodecContext(
                     pFormatCtx->streams[_xx_play->_video_stream_index]->codecpar,
-                    _video_decoder.get()) !=
+                    1) !=
                 0) {
                 pthread_mutex_unlock(&_init_mutex);
                 return -1;
@@ -120,18 +129,25 @@ int XXMediaPlayer::prepare() {
         }
     }
 
+    _xx_play->_mime_type = getMimeType(_xx_play->video_codec_context->codec->name);
+    _xx_play->duration = pFormatCtx->duration / 1000000;
+
+    _audio_decoder = std::shared_ptr<BaseDecoder>(new FFMpegAudioDecoder());
+    _audio_decoder->_xx_play = _xx_play;
+    _audio_decoder->_av_codec_context = _xx_play->audio_codec_context;
+
+    if (_xx_play->media_codec) {
+        _video_decoder = std::shared_ptr<BaseDecoder>(new MediaCodecVideoDecoder());
+    } else {
+        _video_decoder = std::shared_ptr<BaseDecoder>(new FFMpegVideoDecoder());
+    }
+
+    _video_decoder->_xx_play = _xx_play;
+    _video_decoder->_av_codec_context = _xx_play->video_codec_context;
+
     if (_audio_decoder == nullptr && _video_decoder == nullptr) {
         pthread_mutex_unlock(&_init_mutex);
         return -1;;
-    }
-
-    if (_audio_decoder != nullptr) {
-        _xx_play->duration = pFormatCtx->duration / 1000000;
-    }
-
-    if (_video_decoder != nullptr) {
-        _xx_play->_mime_type = getMimeType(_video_decoder->_av_codec_context->codec->name);
-        _xx_play->duration = pFormatCtx->duration / 1000000;
     }
 
     _media_extractor = std::shared_ptr<XXMediaExtractor>(new XXMediaExtractor());
@@ -141,10 +157,12 @@ int XXMediaPlayer::prepare() {
     _audio_render->_xx_play = _xx_play;
     _audio_render->_av_codec_context = _audio_decoder->_av_codec_context;
 
-    _video_render = std::shared_ptr<BaseRender>(new NativeWindowVideoRender());
-    _video_render->_xx_play = _xx_play;
-    _xx_play->_video_render_status = VIDEO_RENDER_STATUS_CREATED;
-    _video_render->_av_codec_context = _video_decoder->_av_codec_context;
+    if (!_xx_play->media_codec) {
+        _video_render = std::shared_ptr<BaseRender>(new NativeWindowVideoRender());
+        _video_render->_xx_play = _xx_play;
+        _xx_play->_video_render_status = VIDEO_RENDER_STATUS_CREATED;
+        _video_render->_av_codec_context = _video_decoder->_av_codec_context;
+    }
 
     _media_extractor->start();
     isPrepared = true;
@@ -160,12 +178,14 @@ void XXMediaPlayer::onStart() {
     if (_xx_play->_play_status == XXP_PLAY_STATUS_CREATED) {
         _xx_play->_play_status = XXP_PLAY_STATUS_PLAY;
 
-        _video_decoder->start();
         _audio_decoder->start();
 
         _audio_render->initRender();
         _audio_render->start();
         //_video_render->start();
+        if(!_xx_play->media_codec){
+            _video_decoder->start();
+        }
         return;
     }
 
@@ -193,27 +213,32 @@ void XXMediaPlayer::onStop() {
 void XXMediaPlayer::onResume() {
 }
 
-int XXMediaPlayer::getAvCodecContext(AVCodecParameters *parameters, BaseDecoder *baseDecoder) {
-
+int XXMediaPlayer::getAvCodecContext(AVCodecParameters *parameters, int codec_type) {
+    AVCodecContext *avCodecContext = nullptr;
     AVCodec *dec = avcodec_find_decoder(parameters->codec_id);
     if (!dec) {
         return -1;
     }
-    baseDecoder->_av_codec_context = avcodec_alloc_context3(dec);
-    if (!baseDecoder->_av_codec_context) {
+    avCodecContext = avcodec_alloc_context3(dec);
+    if (!avCodecContext) {
         return -1;;
     }
-    if (avcodec_parameters_to_context(baseDecoder->_av_codec_context, parameters) != 0) {
+    if (avcodec_parameters_to_context(avCodecContext, parameters) != 0) {
         return -1;;
     }
-    if (avcodec_open2(baseDecoder->_av_codec_context, dec, 0) != 0) {
+    if (avcodec_open2(avCodecContext, dec, 0) != 0) {
         return -1;;
     }
+    if(codec_type == 0){
+        _xx_play->audio_codec_context = avCodecContext;
+    }else{
+        _xx_play->video_codec_context = avCodecContext;
+    }
+    _xx_play->parameters = parameters;
     return 0;
 }
 
 void XXMediaPlayer::setAudioChannel(int index) {
-    if (_audio_decoder != nullptr) {
         int channel_size = _xx_play->_audio_channels.size();
         if (index < channel_size) {
             for (int i = 0; i < channel_size; i++) {
@@ -225,33 +250,32 @@ void XXMediaPlayer::setAudioChannel(int index) {
                 }
             }
         }
-    }
 
 }
 
 void XXMediaPlayer::setVideoChannel(int id) {
-    if (_video_decoder != nullptr) {
         _xx_play->_video_stream_index = _xx_play->_video_channels.at(id)->channelId;
         _xx_play->video_time_base = _xx_play->_video_channels.at(id)->time_base;
         _xx_play->video_rate = 1000 / _xx_play->_video_channels.at(id)->fps;
-    }
 }
 
 int XXMediaPlayer::getMimeType(const char *codecName) {
-
+    //return -1;
     if (strcmp(codecName, "h264") == 0) {
+        _xx_play->media_codec = true;
+
         return 1;
     }
     if (strcmp(codecName, "hevc") == 0) {
+        _xx_play->media_codec = true;
+
         return 2;
     }
     if (strcmp(codecName, "mpeg4") == 0) {
+        _xx_play->media_codec = true;
+
         _xx_play->is_avi = true;
         return 3;
-    }
-    if (strcmp(codecName, "wmv3") == 0) {
-        _xx_play->is_avi = true;
-        return 4;
     }
 
     return -1;

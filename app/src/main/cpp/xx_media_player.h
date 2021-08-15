@@ -33,7 +33,7 @@ private:
     std::shared_ptr<JavaCall> _javaCall;
 
 public:
-    XXMediaPlayer(JavaVM *javaVm, JNIEnv *main_env, jobject media_player_java_ref);
+    XXMediaPlayer(JavaVM *javaVm, JNIEnv *main_env, jobject media_player_java_ref,jobject xx_media_codec);
 
     ~XXMediaPlayer();
 
@@ -61,7 +61,7 @@ public:
 
     void setAudioChannel(int id);
 
-    int getAvCodecContext(AVCodecParameters *parameters, BaseDecoder *baseDecoder);
+    int getAvCodecContext(AVCodecParameters *parameters, int codec_type);
 
     std::shared_ptr<XXMediaExtractor> _media_extractor;
     std::shared_ptr<BaseRender> _audio_render;
