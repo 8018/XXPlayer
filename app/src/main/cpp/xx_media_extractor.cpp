@@ -36,10 +36,18 @@ void XXMediaExtractor::startExtractor() {
 
     AVBSFContext *bsf_ctx;
     AVBitStreamFilter *filter = nullptr;
-    if (_xx_play->_mime_type != -1) {
+    if (_xx_play->_mime_type == 1) {
         //1 找到对应的解码过滤器
         filter = const_cast<AVBitStreamFilter *>(av_bsf_get_by_name(
                 "h264_mp4toannexb"));
+
+    } else if (_xx_play->_mime_type == 2) {
+        //1 找到对应的解码过滤器
+        filter = const_cast<AVBitStreamFilter *>(av_bsf_get_by_name(
+                "hevc_mp4toannexb"));
+    }
+
+    if (filter != nullptr) {
         //2 根据过滤器开辟上下文
         av_bsf_alloc(filter, &bsf_ctx);
         //3 添加解码器属性
@@ -114,6 +122,10 @@ void XXMediaExtractor::startExtractor() {
 
     if (filter != nullptr) {
         av_bsf_free(&bsf_ctx);
+        bsf_ctx = nullptr;
+
+        free(filter);
+        filter = nullptr;
     }
     pthread_mutex_unlock(&_prepare_mutex);
 }
