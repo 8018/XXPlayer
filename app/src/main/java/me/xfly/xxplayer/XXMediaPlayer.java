@@ -55,9 +55,10 @@ public class XXMediaPlayer extends AbstractMediaPlayer {
         System.loadLibrary("xxplayer_jni");
     }
 
-    public XXMediaPlayer() {
+    public XXMediaPlayer(long time) {
         mXXMediaCodec = new XXMediaCodec();
         native_init(new WeakReference<XXMediaPlayer>(this),mXXMediaCodec);
+        mXXMediaCodec.time = time;
         mEventHandler = new EventHandler(this, Looper.getMainLooper());
     }
 

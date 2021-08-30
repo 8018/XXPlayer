@@ -124,8 +124,6 @@ void XXMediaExtractor::startExtractor() {
         av_bsf_free(&bsf_ctx);
         bsf_ctx = nullptr;
 
-        free(filter);
-        filter = nullptr;
     }
     pthread_mutex_unlock(&_prepare_mutex);
 }

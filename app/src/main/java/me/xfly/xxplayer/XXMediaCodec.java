@@ -11,8 +11,8 @@ public class XXMediaCodec {
     MediaCodec mediaCodec;
     MediaFormat mediaFormat;
     Surface surface;
-    long time = 0;
-    int i;
+    public long time = 0;
+    boolean isFirst = true;
 
     public void setSurface(Surface surface) {
         this.surface = surface;
@@ -35,8 +35,11 @@ public class XXMediaCodec {
     }
 
     public void onDecode(byte[] bytes, int size, int pts) {
-        long time2 = System.currentTimeMillis();
-        time = time2;
+        if(isFirst){
+            isFirst = false;
+            long time2 = System.currentTimeMillis();
+           Log.e("onDecode","start up time="+String.valueOf(time2-time));
+        }
         MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
 
         if (bytes != null && mediaCodec != null && info != null) {

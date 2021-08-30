@@ -36,13 +36,13 @@ public class MainActivity extends AppCompatActivity {
 
         // 可以播放本地视频、网络视频和直播流
         //eg 1 本地视频
-        //path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/yun.mp4";
+        path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/yun.mp4";
         //eg 2 网络视频
-        path = "http://vfx.mtime.cn/Video/2019/03/12/mp4/190312143927981075.mp4";
+        //path = "http://vfx.mtime.cn/Video/2019/03/12/mp4/190312143927981075.mp4";
         //eg 3 直播流
         // path = "http://tx2play1.douyucdn.cn/live/718642rFRdEofIfw.xs";
 
-        //path = "http://tx2play1.douyucdn.cn/live/718642rAp6CQLcUu.xs";
+        path = "http://tx2play1.douyucdn.cn/live/999rx47n2pp8pGB7.xs";
 
         textView.setText(path);
         verifyStoragePermissions(this);

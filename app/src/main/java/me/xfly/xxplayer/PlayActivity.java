@@ -23,6 +23,7 @@ public class PlayActivity extends AppCompatActivity implements SurfaceHolder.Cal
     SurfaceView mSurfaceView;
     XXMediaPlayer mMediaPlayer;
     boolean isStarted = false;
+    long time;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,11 +33,12 @@ public class PlayActivity extends AppCompatActivity implements SurfaceHolder.Cal
         setContentView(R.layout.activity_play);
 
         path = getIntent().getStringExtra("path");
+        time = getIntent().getLongExtra("time",0L);
 
         mSurfaceView = findViewById(R.id.video_view);
         mSurfaceView.getHolder().addCallback(this);
 
-        mMediaPlayer = new XXMediaPlayer();
+        mMediaPlayer = new XXMediaPlayer(time);
         mMediaPlayer.setOnPreparedListener(mp -> {
             isStarted = true;
             mMediaPlayer.start();
@@ -70,6 +72,7 @@ public class PlayActivity extends AppCompatActivity implements SurfaceHolder.Cal
     public static void startActivity(String path,Activity activity){
         Intent intent = new Intent(activity,PlayActivity.class);
         intent.putExtra("path",path);
+        intent.putExtra("time",System.currentTimeMillis());
         activity.startActivity(intent);
     }
 
